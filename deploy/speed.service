@@ -1,0 +1,21 @@
+[Unit]
+Description=speed (Tailscale speed test, private network only)
+After=network.target
+
+[Service]
+User=CHANGEME
+ExecStart=/opt/speed/speed
+Environment=BIND=127.0.0.1:8453
+Restart=on-failure
+RestartSec=3
+StartLimitIntervalSec=300
+StartLimitBurst=20
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=128M
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

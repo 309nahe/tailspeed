@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>speed</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1020'/%3E%3Cpath d='M7 21a9 9 0 0 1 18 0' stroke='%235eead4' stroke-width='2.8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M16 21l5-6' stroke='%237aa2ff' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070b14;--card:rgba(17,25,40,.72);--line:rgba(120,160,220,.16);--soft:rgba(120,160,220,.08);
+  --fg:#e6edf7;--muted:#8194ad;--accent:#5eead4;--accent2:#7aa2ff;--ok:#39d98a;--bad:#ff6b6b;--warn:#f5c451;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'JetBrains Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{font-family:var(--sans);color:var(--fg);min-height:100vh;padding:28px 16px 48px;display:flex;justify-content:center;
+  background:radial-gradient(800px 400px at 20% -8%,rgba(122,162,255,.14),transparent 60%),
+    radial-gradient(600px 350px at 85% 5%,rgba(94,234,212,.10),transparent 55%),var(--bg)}
+.wrap{width:100%;max-width:640px}
+.suite{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px}
+.suite a{font:11.5px/1 var(--mono);color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid transparent;transition:all .2s}
+.suite a:hover{color:var(--fg);background:var(--soft)}
+.suite a.on{color:var(--accent);border-color:rgba(94,234,212,.3);background:rgba(94,234,212,.08)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#5eead4,#7aa2ff);display:grid;place-items:center;flex:none;box-shadow:0 6px 24px rgba(94,234,212,.25)}
+.logo svg{width:22px;height:22px}
+h1{font-size:20px;letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--muted);font-size:12px;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.28)}
+.label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+/* device */
+.dev{display:flex;align-items:center;gap:14px}
+.dev .ico{width:44px;height:44px;border-radius:12px;background:rgba(122,162,255,.1);display:grid;place-items:center;flex:none;font-size:20px}
+.dev .who{flex:1;min-width:0}
+.dev .name{font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dev .meta{font:11.5px var(--mono);color:var(--muted);margin-top:3px}
+.route{display:flex;align-items:center;gap:8px;margin-top:16px;font:12px var(--mono);color:var(--muted);flex-wrap:wrap}
+.node{padding:5px 9px;border-radius:8px;background:var(--soft);border:1px solid var(--line);color:var(--fg)}
+.wire{flex:1;min-width:30px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--line),var(--line))}
+.wire.direct{background:linear-gradient(90deg,#39d98a,#5eead4)}
+.wire.relay{background:repeating-linear-gradient(90deg,#f5c451 0 6px,transparent 6px 11px)}
+.pill{font:600 11px var(--mono);padding:4px 9px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:rgba(57,217,138,.12);color:var(--ok)}
+.pill.warn{background:rgba(245,196,81,.12);color:var(--warn)}
+.pill.mut{background:var(--soft);color:var(--muted)}
+.ghost{background:var(--soft);border:1px solid var(--line);color:var(--fg);padding:8px 12px;border-radius:9px;font:600 12.5px/1 var(--sans);cursor:pointer;transition:all .2s;white-space:nowrap}
+.ghost:hover:not(:disabled){background:rgba(120,160,220,.16)}
+.ghost:disabled{opacity:.45;cursor:not-allowed}
+.pongs{margin-top:12px;font:11.5px var(--mono);color:var(--muted);line-height:1.7}
+.pongs b{color:var(--fg);font-weight:600}
+.hintline{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+/* gauge */
+.gwrap{position:relative;width:min(320px,100%);margin:4px auto 0}
+.gwrap svg{width:100%;display:block;overflow:visible}
+.gval{position:absolute;left:0;right:0;top:46%;text-align:center}
+.gnum{font:700 46px/1 var(--mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.gunit{font:12px var(--mono);color:var(--muted);margin-top:6px}
+.gphase{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-top:8px;min-height:14px}
+.tick{font:10px var(--mono);fill:#5d6f88}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.stat{background:rgba(120,160,220,.05);border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center;transition:border-color .3s}
+.stat.live{border-color:rgba(94,234,212,.45)}
+.stat .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.stat .v{font:700 20px var(--mono);margin-top:6px;font-variant-numeric:tabular-nums}
+.stat .u{font:10.5px var(--mono);color:var(--muted);margin-top:2px}
+.go{display:block;margin:20px auto 0;width:150px;height:150px;border-radius:50%;border:none;cursor:pointer;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.18),transparent 45%),linear-gradient(135deg,#5eead4,#7aa2ff);
+  color:#071018;font:800 22px/1 var(--sans);letter-spacing:.06em;box-shadow:0 0 0 10px rgba(94,234,212,.07),0 14px 40px rgba(94,234,212,.25);transition:transform .2s,box-shadow .2s}
+.go:hover{transform:scale(1.04);box-shadow:0 0 0 14px rgba(94,234,212,.09),0 18px 50px rgba(94,234,212,.32)}
+.go.small{width:auto;height:auto;border-radius:10px;padding:11px 20px;font-size:13.5px;letter-spacing:0;box-shadow:0 6px 18px rgba(94,234,212,.2)}
+.go.small:hover{transform:none}
+.dur{display:flex;justify-content:center;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:rgba(120,160,220,.05);border:none;color:var(--muted);padding:7px 11px;font:600 11.5px/1 var(--mono);cursor:pointer}
+.seg button.active{background:rgba(94,234,212,.14);color:var(--accent)}
+.err{color:var(--bad);font:12px var(--mono);text-align:center;margin-top:12px}
+/* history */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;padding:0 6px 8px}
+td{padding:8px 6px;border-top:1px solid rgba(120,160,220,.1);font-family:var(--mono);white-space:nowrap}
+td.n{font-family:var(--sans);color:#d5e2f5;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+td.r,th.r{text-align:right}
+tr.me td.n:after{content:' ●';color:var(--accent);font-size:9px;vertical-align:2px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:12px 0 2px;opacity:.7}
+.caps{font-size:11px;color:var(--muted);line-height:1.6;opacity:.7;margin-top:6px}
+.caps span{font-family:var(--mono);color:var(--accent)}
+@media(max-width:560px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .gnum{font-size:40px}
+  .hide-sm{display:none}
+}
+</style></head><body>
+<div class="wrap">
+  <nav class="suite"><a href="../audio/">audio</a><a href="../xvids/">xvids</a><a href="../drop/">drop</a><a href="../squish/">squish</a><a class="on" href="./">speed</a></nav>
+  <header>
+    <div class="logo"><svg viewBox="0 0 22 22" fill="none"><path d="M4 15a7 7 0 0 1 14 0" stroke="#071018" stroke-width="2.4" stroke-linecap="round"/><path d="M11 15l4-5" stroke="#071018" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div><h1>speed</h1><div class="sub">your device ⇄ this server, over Tailscale</div></div>
+  </header>
+
+  <div class="card">
+    <span class="label">Connection</span>
+    <div class="dev">
+      <div class="ico" id="dico">⌁</div>
+      <div class="who"><div class="name" id="dname">Detecting…</div><div class="meta" id="dmeta"></div></div>
+      <span class="pill mut" id="dpath">…</span>
+    </div>
+    <div class="route" id="route" hidden>
+      <span class="node" id="rme">you</span><span class="wire" id="w1"></span>
+      <span class="node" id="rmid" hidden></span><span class="wire" id="w2" hidden></span>
+      <span class="node" id="rsrv">server</span>
+    </div>
+    <div class="hintline" id="dhint"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="ghost" id="pathbtn">Check path</button>
+      <span class="pongs" id="pongs"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="gwrap">
+      <svg viewBox="0 0 300 220" id="gauge" aria-hidden="true">
+        <defs>
+          <linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#7aa2ff"/></linearGradient>
+          <linearGradient id="gu" x1="0" x2="1"><stop offset="0" stop-color="#7aa2ff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path id="track" fill="none" stroke="rgba(120,160,220,.14)" stroke-width="14" stroke-linecap="round"/>
+        <path id="arc" fill="none" stroke="url(#gg)" stroke-width="14" stroke-linecap="round" filter="url(#glow)"/>
+        <g id="ticks"></g>
+      </svg>
+      <div class="gval"><div class="gnum" id="gnum">—</div><div class="gunit">Mbps</div><div class="gphase" id="gphase"></div></div>
+    </div>
+    <div class="stats">
+      <div class="stat" id="sping"><div class="k">Ping</div><div class="v" id="vping">—</div><div class="u">ms</div></div>
+      <div class="stat" id="sjit"><div class="k">Jitter</div><div class="v" id="vjit">—</div><div class="u">ms</div></div>
+      <div class="stat" id="sdown"><div class="k">Down</div><div class="v" id="vdown">—</div><div class="u">Mbps</div></div>
+      <div class="stat" id="sup"><div class="k">Up</div><div class="v" id="vup">—</div><div class="u">Mbps</div></div>
+    </div>
+    <button class="go" id="go">GO</button>
+    <div class="dur">Duration <div class="seg" id="dur"><button data-v="5">5s</button><button data-v="8" class="active">8s</button><button data-v="15">15s</button></div></div>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="card">
+    <span class="label">Recent tests, all devices</span>
+    <div id="hist"><div class="empty">No tests yet.</div></div>
+  </div>
+
+  <div class="caps">Measures the path between this browser and the server, not your internet line · history lives in server memory (last <span>100</span>) and resets on restart · tailnet only</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let DUR=8,running=false,me=null;
+const W=300,CX=150,CY=150,R=118,A0=Math.PI*0.75,SPAN=Math.PI*1.5,MAXV=1000;
+const scale=v=>Math.log10(1+Math.max(0,v))/Math.log10(1+MAXV);
+function pt(f,r=R){const a=A0+SPAN*Math.min(1,Math.max(0,f));return[CX+r*Math.cos(a),CY+r*Math.sin(a)]}
+function arcPath(f){if(f<=0.001)return'';const[x0,y0]=pt(0),[x1,y1]=pt(f);return`M${x0} ${y0}A${R} ${R} 0 ${SPAN*f>Math.PI?1:0} 1 ${x1} ${y1}`}
+$('track').setAttribute('d',arcPath(1));
+(()=>{const g=$('ticks');for(const v of [0,1,5,10,50,100,250,500,1000]){const[x,y]=pt(scale(v),R-26);const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x);t.setAttribute('y',y+3);t.setAttribute('text-anchor','middle');t.setAttribute('class','tick');t.textContent=v>=1000?'1G':v;g.appendChild(t)}})();
+let shown=0,target=0,raf=0;
+function setGauge(v,grad){target=v;$('arc').setAttribute('stroke',grad==='up'?'url(#gu)':'url(#gg)');if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){shown+=(target-shown)*0.18;if(Math.abs(target-shown)<0.01)shown=target;
+  $('arc').setAttribute('d',arcPath(scale(shown)));$('gnum').textContent=target===null?'—':fmt(shown);
+  raf=Math.abs(target-shown)>0.01?requestAnimationFrame(tick):0}
+const fmt=v=>v>=100?v.toFixed(0):v>=10?v.toFixed(1):v.toFixed(2);
+function phase(t,id){$('gphase').textContent=t;document.querySelectorAll('.stat').forEach(s=>s.classList.toggle('live',s.id===id))}
+document.querySelectorAll('#dur button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#dur button').forEach(x=>x.classList.remove('active'));b.classList.add('active');DUR=+b.dataset.v});
+
+// ---- connection ----
+const osIcon=o=>({android:'📱',iOS:'📱',macOS:'💻',windows:'🖥',linux:'🐧'}[o]||'⌁');
+async function who(){
+  try{
+    const d=await (await fetch('api/whoami',{cache:'no-store'})).json();me=d;
+    const p=d.peer;
+    $('rsrv').textContent=d.server?.host||'server';
+    if(!p){$('dname').textContent=d.ip||'Unknown device';$('dmeta').textContent='not found in the tailnet status';$('dpath').className='pill mut';$('dpath').textContent='unknown';return}
+    $('dico').textContent=osIcon(p.os);
+    $('dname').textContent=p.host;
+    $('dmeta').textContent=[p.os,d.ip,d.user].filter(Boolean).join(' · ');
+    $('route').hidden=false;$('rme').textContent=p.host;
+    if(p.self){$('dpath').className='pill ok';$('dpath').textContent='same machine';$('w1').className='wire direct';$('rmid').hidden=$('w2').hidden=true;$('dhint').textContent='You are testing from the server itself, so this measures the machine, not the network.';$('pathbtn').hidden=true;return}
+    if(p.direct){
+      $('dpath').className='pill ok';$('dpath').textContent='direct';$('w1').className='wire direct';$('rmid').hidden=$('w2').hidden=true;
+      $('dhint').textContent='Peer-to-peer WireGuard path: this is as fast as your network allows.';
+    }else{
+      $('dpath').className='pill warn';$('dpath').textContent='relay'+(p.relay?' · '+p.relay:'');
+      $('w1').className=$('w2').className='wire relay';$('rmid').hidden=$('w2').hidden=false;$('rmid').textContent='DERP '+(p.relay||'?');
+      $('dhint').textContent='Traffic is bounced through a Tailscale relay, which caps speed and adds latency. "Check path" pings your device and nudges Tailscale to try a direct route.';
+    }
+  }catch(e){$('dname').textContent='Could not detect device'}
+}
+$('pathbtn').onclick=async()=>{
+  const b=$('pathbtn');b.disabled=true;b.textContent='Pinging…';$('pongs').textContent='';
+  try{
+    const r=await fetch('api/path',{method:'POST'});
+    if(!r.ok){$('pongs').textContent=await r.text();return}
+    const d=await r.json();
+    if(d.timeout){$('pongs').textContent='no reply: the device may block pings or be asleep';return}
+    $('pongs').textContent='';
+    d.pongs.forEach((p,i)=>{const s=document.createElement('span');s.innerHTML='';const bb=document.createElement('b');bb.textContent=p.ms+' ms';
+      s.append(bb,document.createTextNode(' via '+p.via+(i<d.pongs.length-1?'  ·  ':'')));$('pongs').appendChild(s)});
+    who();
+  }catch(e){$('pongs').textContent='failed: '+e.message}
+  finally{b.disabled=false;b.textContent='Check path'}
+};
+
+// ---- measurements ----
+async function measurePing(){
+  phase('latency','sping');const t=[];
+  for(let i=0;i<14;i++){const s=performance.now();await fetch('api/ping?'+i+'_'+Math.random(),{cache:'no-store'});t.push(performance.now()-s)}
+  const x=t.slice(2),sorted=[...x].sort((a,b)=>a-b),med=sorted[sorted.length>>1];
+  let j=0;for(let i=1;i<x.length;i++)j+=Math.abs(x[i]-x[i-1]);j/=x.length-1;
+  return{ping:med,jitter:j};
+}
+async function measureDown(){
+  phase('download','sdown');setGauge(0,'down');
+  const ctl=new AbortController();let bytes=0,warm=0;const t0=performance.now(),warmT=1200;let tw=0;
+  const worker=async()=>{while(!ctl.signal.aborted){try{
+    const r=await fetch('api/down?bytes='+(64<<20)+'&r='+Math.random(),{cache:'no-store',signal:ctl.signal});
+    const rd=r.body.getReader();for(;;){const{done,value}=await rd.read();if(done)break;bytes+=value.length}
+  }catch(e){break}}};
+  const ws=[0,1,2,3].map(worker);
+  let last=bytes,lt=t0;
+  const iv=setInterval(()=>{const n=performance.now();
+    if(!tw&&n-t0>warmT){tw=n;warm=bytes}
+    const inst=(bytes-last)*8/((n-lt)/1000)/1e6;last=bytes;lt=n;
+    const avg=tw?(bytes-warm)*8/((n-tw)/1000)/1e6:inst;setGauge(tw?avg:inst,'down');$('vdown').textContent=fmt(tw?avg:inst)},200);
+  await new Promise(r=>setTimeout(r,DUR*1000));
+  ctl.abort();clearInterval(iv);await Promise.allSettled(ws);
+  const n=performance.now();return tw?(bytes-warm)*8/((n-tw)/1000)/1e6:bytes*8/((n-t0)/1000)/1e6;
+}
+function randBlob(n){const a=new Uint8Array(n);for(let i=0;i<n;i+=65536)crypto.getRandomValues(a.subarray(i,Math.min(n,i+65536)));return new Blob([a])}
+async function measureUp(){
+  phase('upload','sup');setGauge(0,'up');
+  const blob=randBlob(8<<20);let bytes=0,stop=false;const xhrs=new Set();const t0=performance.now(),warmT=1200;let tw=0,warm=0;
+  const worker=()=>new Promise(res=>{const go=()=>{if(stop)return res();
+    const x=new XMLHttpRequest();xhrs.add(x);let prev=0;
+    x.upload.onprogress=e=>{bytes+=e.loaded-prev;prev=e.loaded};
+    x.onloadend=()=>{xhrs.delete(x);if(!stop)go();else res()};
+    x.open('POST','api/up');x.send(blob)};go()});
+  const ws=[0,1,2].map(worker);
+  let last=0,lt=t0;
+  const iv=setInterval(()=>{const n=performance.now();
+    if(!tw&&n-t0>warmT){tw=n;warm=bytes}
+    const inst=(bytes-last)*8/((n-lt)/1000)/1e6;last=bytes;lt=n;
+    const avg=tw?(bytes-warm)*8/((n-tw)/1000)/1e6:inst;setGauge(tw?avg:inst,'up');$('vup').textContent=fmt(tw?avg:inst)},200);
+  await new Promise(r=>setTimeout(r,DUR*1000));
+  stop=true;const n=performance.now();clearInterval(iv);xhrs.forEach(x=>x.abort());await Promise.allSettled(ws);
+  return tw?(bytes-warm)*8/((n-tw)/1000)/1e6:bytes*8/((n-t0)/1000)/1e6;
+}
+
+$('go').onclick=async()=>{
+  if(running)return;running=true;$('err').textContent='';
+  const g=$('go');g.disabled=true;g.classList.add('small');g.textContent='Testing…';
+  ['vping','vjit','vdown','vup'].forEach(i=>$(i).textContent='—');
+  try{
+    const{ping,jitter}=await measurePing();$('vping').textContent=fmt(ping);$('vjit').textContent=fmt(jitter);
+    const down=await measureDown();$('vdown').textContent=fmt(down);
+    const up=await measureUp();$('vup').textContent=fmt(up);
+    phase('done','');setGauge(down,'down');
+    await fetch('api/results',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({down,up,ping,jitter})});
+    hist();
+  }catch(e){$('err').textContent='Test failed: '+e.message;phase('','')}
+  finally{running=false;g.disabled=false;g.textContent='Run again'}
+};
+
+function ago(t){const s=Math.floor(Date.now()/1000)-t;return s<60?s+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'}
+async function hist(){
+  try{
+    const rows=await (await fetch('api/results',{cache:'no-store'})).json();
+    const H=$('hist');H.textContent='';
+    if(!rows.length){H.innerHTML='<div class="empty">No tests yet. Hit GO from any device on your tailnet.</div>';return}
+    const t=document.createElement('table');
+    t.innerHTML='<thead><tr><th>Device</th><th class="hide-sm">Path</th><th class="r">Down</th><th class="r">Up</th><th class="r">Ping</th><th class="r hide-sm">When</th></tr></thead>';
+    const tb=document.createElement('tbody');
+    for(const r of rows.slice(0,20)){
+      const tr=document.createElement('tr');if(me&&r.ip===me.ip)tr.className='me';
+      const cells=[[r.host,'n'],[r.path,'hide-sm'],[fmt(r.down),'r'],[fmt(r.up),'r'],[fmt(r.ping),'r'],[ago(r.at),'r hide-sm']];
+      for(const[v,c]of cells){const td=document.createElement('td');td.className=c;td.textContent=v;if(v===r.path)td.style.color=r.path==='direct'||r.path==='local'?'var(--ok)':'var(--warn)';tr.appendChild(td)}
+      tb.appendChild(tr);
+    }
+    t.appendChild(tb);H.appendChild(t);
+  }catch(e){}
+}
+who().then(hist);
+</script></body></html>
